@@ -1,4 +1,4 @@
-# DeepRL-Nanodegree-Project3-CollaborationAndCompetition
+# DeepRL-Nanodegree-Project3 (CollaborationAndCompetition)
 
 * Set-up: Two-player game where agents control rackets to bounce ball over a net.
 * Goal: The agents must bounce ball between one another while not dropping or sending ball out of bounds.
