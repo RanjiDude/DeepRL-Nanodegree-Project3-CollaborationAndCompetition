@@ -29,7 +29,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 class Agent():
     """Interacts with and learns from the environment."""
 
-    def __init__(self, num_agents, state_size, action_size, random_seed):
+    def __init__(self, state_size, action_size, random_seed):
         """Initialize an Agent object.
         Params
         ======
@@ -39,17 +39,16 @@ class Agent():
         """
         self.state_size = state_size
         self.action_size = action_size
-        self.num_agents = num_agents
         self.seed = random.seed(random_seed)
 
         # Actor Network (w/ Target Network)
-        self.actor_local = Actor(num_agents, state_size, action_size, random_seed).to(device)
-        self.actor_target = Actor(num_agents, state_size, action_size, random_seed).to(device)
+        self.actor_local = Actor(state_size, action_size, random_seed).to(device)
+        self.actor_target = Actor(state_size, action_size, random_seed).to(device)
         self.actor_optimizer = optim.Adam(self.actor_local.parameters(), lr=LR_ACTOR)
 
         # Critic Network (w/ Target Network)
-        self.critic_local = Critic(num_agents, state_size, action_size, random_seed).to(device)
-        self.critic_target = Critic(num_agents, state_size, action_size, random_seed).to(device)
+        self.critic_local = Critic(state_size, action_size, random_seed).to(device)
+        self.critic_target = Critic(state_size, action_size, random_seed).to(device)
         self.critic_optimizer = optim.Adam(self.critic_local.parameters(), lr=LR_CRITIC, weight_decay=WEIGHT_DECAY)
 
         # Noise process
@@ -115,9 +114,9 @@ class Agent():
         actions_next = self.actor_target(next_states)
         # Construct next actions vector relative to the agent
         if agent_num == 0:
-            actions_next = torch.cat((actions_next, actions[:,2:]), dim=1)
+            actions_next = torch.cat((actions_next, actions[:, 2:]), dim=1)
         else:
-            actions_next = torch.cat((actions[:,:2], actions_next), dim=1)
+            actions_next = torch.cat((actions[:, :2], actions_next), dim=1)
         Q_targets_next = self.critic_target(next_states, actions_next)
         # Compute Q targets for current states (y_i)
         Q_targets = rewards + (gamma * Q_targets_next * (1 - dones))
@@ -160,6 +159,7 @@ class Agent():
         for target_param, local_param in zip(target_model.parameters(), local_model.parameters()):
             target_param.data.copy_(tau*local_param.data + (1.0-tau)*target_param.data)
 
+
 class OUNoise:
     """Ornstein-Uhlenbeck process."""
 
@@ -181,6 +181,7 @@ class OUNoise:
         dx = self.theta * (self.mu - x) + self.sigma * np.array([random.random() for i in range(len(x))])
         self.state = x + dx
         return self.state
+
 
 class ReplayBuffer:
     """Fixed-size buffer to store experience tuples."""
